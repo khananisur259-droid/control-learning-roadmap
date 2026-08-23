@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light">
+  <title>控制方向交互式学习树</title>
+  <link rel="icon" href="assets/icons/list-tree.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!--
+  THESIS: 把控制学习路线做成一张真实可操作的系统框图，拒绝课程卡片墙和静态脑图。
+  OWN-WORLD: 浅灰实验台外壳、白色信号画布、石墨文字、森林绿单一强调色。
+  STORY: 先看知识拓扑，再搜索、筛选和查看节点详情，最后记录完成状态。
+  FIRST VIEWPORT: 顶部工具栏，左侧目录，中间树画布，右侧节点详情。
+  FORM: Operate 模式三栏工程工具，窄屏转换为画布与抽屉。
+  -->
+  <div id="app" class="app-shell">
+    <header class="topbar">
+      <div class="brand-block">
+        <button class="icon-button mobile-only" id="mobile-nav-button" type="button" title="打开目录" aria-label="打开目录">
+          <img src="assets/icons/menu.svg" alt="">
+        </button>
+        <div>
+          <div class="brand-title">控制方向学习树</div>
+          <div class="brand-meta"><span>实验室培养路线</span><code>V1.0.2</code></div>
+        </div>
+      </div>
+
+      <div class="search-wrap" role="search">
+        <img src="assets/icons/search.svg" alt="">
+        <input id="search-input" type="search" autocomplete="off" placeholder="搜索 PID、卡尔曼、循迹、实训或踩坑" aria-label="搜索学习节点">
+        <button id="clear-search" class="search-clear" type="button" aria-label="清除搜索" title="清除搜索" hidden>
+          <img src="assets/icons/x.svg" alt="">
+        </button>
+        <div id="search-results" class="search-results" role="listbox" hidden></div>
+      </div>
+
+      <div class="toolbar" aria-label="树状图工具">
+        <label class="select-control" title="筛选知识范围">
+          <img src="assets/icons/filter.svg" alt="">
+          <select id="scope-select" aria-label="筛选知识范围"></select>
+        </label>
+        <button class="icon-button" id="expand-all" type="button" title="全部展开" aria-label="全部展开">
+          <img src="assets/icons/chevrons-up-down.svg" alt="">
+        </button>
+        <button class="icon-button" id="collapse-all" type="button" title="全部收起" aria-label="全部收起">
+          <img src="assets/icons/chevrons-down-up.svg" alt="">
+        </button>
+        <span class="toolbar-separator" aria-hidden="true"></span>
+        <button class="icon-button" id="zoom-out" type="button" title="缩小" aria-label="缩小">
+          <img src="assets/icons/zoom-out.svg" alt="">
+        </button>
+        <button class="icon-button" id="fit-view" type="button" title="适应画布" aria-label="适应画布">
+          <img src="assets/icons/locate-fixed.svg" alt="">
+        </button>
+        <button class="icon-button" id="zoom-in" type="button" title="放大" aria-label="放大">
+          <img src="assets/icons/zoom-in.svg" alt="">
+        </button>
+        <output id="zoom-label" class="zoom-label" aria-live="polite">100%</output>
+        <button class="icon-button mobile-only" id="mobile-detail-button" type="button" title="打开详情" aria-label="打开详情">
+          <img src="assets/icons/panel-right.svg" alt="">
+        </button>
+      </div>
+    </header>
+
+    <main class="workspace">
+      <aside class="navigator panel" id="navigator" aria-label="学习路线目录">
+        <div class="panel-heading">
+          <div>
+            <h2>学习目录</h2>
+            <p id="node-count">载入中</p>
+          </div>
+          <button class="icon-button mobile-only" id="close-nav" type="button" title="关闭目录" aria-label="关闭目录">
+            <img src="assets/icons/x.svg" alt="">
+          </button>
+        </div>
+        <div class="progress-block">
+          <div class="progress-row">
+            <span>个人进度</span>
+            <strong id="progress-label">0 / 0</strong>
+          </div>
+          <div class="progress-track" aria-hidden="true"><span id="progress-bar"></span></div>
+        </div>
+        <nav id="outline-tree" class="outline-tree" aria-label="知识树目录"></nav>
+        <div class="navigator-actions">
+          <button class="text-button" id="export-progress" type="button"><img src="assets/icons/download.svg" alt="">导出进度</button>
+          <button class="text-button" id="import-progress" type="button"><img src="assets/icons/upload.svg" alt="">导入</button>
+          <button class="icon-button danger-button" id="clear-progress" type="button" title="清空进度" aria-label="清空进度"><img src="assets/icons/trash-2.svg" alt=""></button>
+          <input id="progress-file" type="file" accept="application/json,.json" hidden>
+        </div>
+      </aside>
+
+      <section class="canvas-panel" aria-label="控制方向学习树画布">
+        <div id="canvas" class="canvas" tabindex="0">
+          <div id="world" class="world">
+            <svg id="connections" class="connections" aria-hidden="true"></svg>
+            <div id="nodes-layer" class="nodes-layer"></div>
+          </div>
+          <div id="canvas-empty" class="canvas-state" hidden>
+            <img src="assets/icons/search.svg" alt="">
+            <h2>没有匹配节点</h2>
+            <p>调整搜索词或切换知识范围。</p>
+            <button class="text-button primary-button" id="reset-filter" type="button">查看全部</button>
+          </div>
+          <div class="canvas-help" aria-label="画布操作提示">
+            <span>拖动平移</span><span>滚轮缩放</span><span>单击查看</span>
+          </div>
+        </div>
+      </section>
+
+      <aside class="details panel" id="details" aria-label="节点详情">
+        <div class="panel-heading details-heading">
+          <div>
+            <span class="detail-kicker" id="detail-type">路线总览</span>
+            <h2 id="detail-title">控制方向学习路线</h2>
+          </div>
+          <button class="icon-button mobile-only" id="close-detail" type="button" title="关闭详情" aria-label="关闭详情">
+            <img src="assets/icons/x.svg" alt="">
+          </button>
+        </div>
+        <div id="detail-content" class="detail-content"></div>
+        <div class="detail-footer">
+          <label class="completion-toggle">
+            <input id="completion-checkbox" type="checkbox">
+            <span class="check-control"><img src="assets/icons/check.svg" alt=""></span>
+            <span>标记这个节点已完成</span>
+          </label>
+        </div>
+      </aside>
+    </main>
+  </div>
+
+  <div id="backdrop" class="backdrop" hidden></div>
+  <div id="toast-region" class="toast-region" aria-live="polite" aria-atomic="true"></div>
+
+  <script src="tree-data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
