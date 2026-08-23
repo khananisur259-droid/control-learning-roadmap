@@ -6,7 +6,7 @@
   <meta name="color-scheme" content="light">
   <title>控制方向交互式学习树</title>
   <link rel="icon" href="assets/icons/list-tree.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="styles.css?v=1.0.5">
+  <link rel="stylesheet" href="styles.css?v=1.1.0">
 </head>
 <body>
   <!--
@@ -22,9 +22,10 @@
         <button class="icon-button mobile-only" id="mobile-nav-button" type="button" title="打开目录" aria-label="打开目录">
           <img src="assets/icons/menu.svg" alt="">
         </button>
+        <span class="brand-mark" aria-hidden="true"><img src="assets/icons/list-tree.svg" alt=""></span>
         <div>
           <div class="brand-title">控制方向学习树</div>
-          <div class="brand-meta"><span>控制学习与实训</span><code>V1.0.5</code></div>
+          <div class="brand-meta"><span>控制学习与实训</span><code>V1.1.0</code></div>
         </div>
       </div>
 
@@ -38,27 +39,32 @@
       </div>
 
       <div class="toolbar" aria-label="树状图工具">
-        <label class="select-control" title="筛选知识范围">
-          <img src="assets/icons/filter.svg" alt="">
-          <select id="scope-select" aria-label="筛选知识范围"></select>
-        </label>
-        <button class="icon-button" id="expand-all" type="button" title="全部展开" aria-label="全部展开">
-          <img src="assets/icons/chevrons-up-down.svg" alt="">
-        </button>
-        <button class="icon-button" id="collapse-all" type="button" title="全部收起" aria-label="全部收起">
-          <img src="assets/icons/chevrons-down-up.svg" alt="">
-        </button>
-        <span class="toolbar-separator" aria-hidden="true"></span>
-        <button class="icon-button" id="zoom-out" type="button" title="缩小" aria-label="缩小">
-          <img src="assets/icons/zoom-out.svg" alt="">
-        </button>
-        <button class="icon-button" id="fit-view" type="button" title="适应画布" aria-label="适应画布">
-          <img src="assets/icons/locate-fixed.svg" alt="">
-        </button>
-        <button class="icon-button" id="zoom-in" type="button" title="放大" aria-label="放大">
-          <img src="assets/icons/zoom-in.svg" alt="">
-        </button>
-        <output id="zoom-label" class="zoom-label" aria-live="polite">100%</output>
+        <div class="toolbar-group scope-group">
+          <label class="select-control" title="筛选知识范围">
+            <img src="assets/icons/filter.svg" alt="">
+            <select id="scope-select" aria-label="筛选知识范围"></select>
+          </label>
+        </div>
+        <div class="toolbar-group branch-group">
+          <button class="icon-button" id="expand-all" type="button" title="全部展开" aria-label="全部展开">
+            <img src="assets/icons/chevrons-up-down.svg" alt="">
+          </button>
+          <button class="icon-button" id="collapse-all" type="button" title="全部收起" aria-label="全部收起">
+            <img src="assets/icons/chevrons-down-up.svg" alt="">
+          </button>
+        </div>
+        <div class="toolbar-group zoom-group">
+          <button class="icon-button" id="zoom-out" type="button" title="缩小" aria-label="缩小">
+            <img src="assets/icons/zoom-out.svg" alt="">
+          </button>
+          <button class="icon-button" id="fit-view" type="button" title="适应画布" aria-label="适应画布">
+            <img src="assets/icons/locate-fixed.svg" alt="">
+          </button>
+          <button class="icon-button" id="zoom-in" type="button" title="放大" aria-label="放大">
+            <img src="assets/icons/zoom-in.svg" alt="">
+          </button>
+          <output id="zoom-label" class="zoom-label" aria-live="polite">100%</output>
+        </div>
         <button class="icon-button mobile-only" id="mobile-detail-button" type="button" title="打开详情" aria-label="打开详情">
           <img src="assets/icons/panel-right.svg" alt="">
         </button>
@@ -104,9 +110,6 @@
             <p>调整搜索词或切换知识范围。</p>
             <button class="text-button primary-button" id="reset-filter" type="button">查看全部</button>
           </div>
-          <div class="canvas-help" aria-label="画布操作提示">
-            <span>拖动平移</span><span>滚轮缩放</span><span>单击查看</span>
-          </div>
         </div>
       </section>
 
@@ -135,8 +138,8 @@
   <div id="backdrop" class="backdrop" hidden></div>
   <div id="toast-region" class="toast-region" aria-live="polite" aria-atomic="true"></div>
 
-  <script src="tree-data.js?v=1.0.5"></script>
-  <script src="code-templates.js?v=1.0.5"></script>
-  <script src="app.js?v=1.0.5"></script>
+  <script src="tree-data.js?v=1.1.0"></script>
+  <script src="code-templates.js?v=1.1.0"></script>
+  <script src="app.js?v=1.1.0"></script>
 </body>
 </html>

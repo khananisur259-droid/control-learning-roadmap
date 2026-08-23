@@ -4,11 +4,11 @@
   const data = window.LEARNING_TREE;
   const codeTemplates = window.CODE_TEMPLATES || {};
   const ICON = "assets/icons/";
-  const NODE_W = 210;
-  const NODE_H = 76;
-  const X_GAP = 98;
-  const Y_GAP = 20;
-  const PADDING = 48;
+  const NODE_W = 224;
+  const NODE_H = 82;
+  const X_GAP = 108;
+  const Y_GAP = 22;
+  const PADDING = 56;
   const STORAGE_KEY = "control-roadmap-progress-v1";
 
   const elements = {
@@ -481,7 +481,7 @@
   function exportProgress() {
     const payload = {
       schema: "control-roadmap-progress-v1",
-      version: "V1.0.5",
+      version: "V1.1.0",
       exportedAt: new Date().toISOString(),
       completed: Array.from(state.completed)
     };
