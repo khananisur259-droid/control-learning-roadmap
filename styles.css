@@ -17,7 +17,7 @@
   --focus: #13795b;
   --topbar-h: 58px;
   --nav-w: 272px;
-  --detail-w: 360px;
+  --detail-w: 460px;
   --radius: 6px;
   --node-w: 210px;
   font-family: "Segoe UI", "Microsoft YaHei UI", "Noto Sans SC", sans-serif;
@@ -227,6 +227,30 @@ img { display: block; }
 .source-link { display: inline-flex; align-items: center; gap: 6px; color: var(--accent-dark); text-decoration: none; font-weight: 600; }
 .source-link:hover { text-decoration: underline; }
 .source-link img { width: 14px; height: 14px; }
+
+.template-notice { margin: 0 0 12px; padding-left: 10px; border-left: 3px solid var(--accent); color: var(--text-secondary); font-size: 12px; line-height: 1.6; }
+.code-template + .code-template { margin-top: 22px; padding-top: 20px; border-top: 1px solid var(--border); }
+.template-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.template-heading > div { min-width: 0; display: grid; gap: 4px; }
+.template-heading > div > span { color: var(--accent-dark); font-family: "Cascadia Mono", Consolas, monospace; font-size: 10px; font-weight: 700; }
+.template-heading strong { font-size: 13px; line-height: 1.45; }
+.copy-button { flex: 0 0 auto; min-height: 34px; display: inline-flex; align-items: center; gap: 6px; padding: 0 10px; border: 1px solid var(--border-strong); border-radius: 5px; background: var(--surface); color: var(--text); font: inherit; font-size: 11px; font-weight: 700; cursor: pointer; }
+.copy-button:hover { border-color: var(--accent); color: var(--accent-dark); }
+.copy-button.copied { border-color: var(--accent); background: var(--accent-soft); color: var(--accent-dark); }
+.copy-button img { width: 14px; height: 14px; }
+.template-summary { margin: 10px 0; color: var(--text-secondary); font-size: 12px; line-height: 1.65; }
+.template-boundary { margin: 0 0 12px; display: grid; gap: 8px; }
+.template-boundary > div { display: grid; grid-template-columns: 78px minmax(0, 1fr); gap: 8px; align-items: start; }
+.template-boundary dt { color: var(--text); font-size: 11px; font-weight: 700; }
+.template-boundary dd { margin: 0; color: var(--text-secondary); font-size: 11px; line-height: 1.55; }
+.code-template pre { max-width: 100%; margin: 0; overflow: auto; border: 1px solid var(--border); border-radius: 5px; background: #f1f4f2; color: #17211d; }
+.code-template pre code { display: block; min-width: max-content; padding: 13px 14px; font-family: "Cascadia Mono", Consolas, monospace; font-size: 11px; line-height: 1.6; tab-size: 4; }
+.code-template .detail-section { margin-top: 12px; padding-top: 11px; }
+.template-sources { display: grid; gap: 7px; margin-top: 12px; }
+.template-sources > span { color: var(--text); font-size: 11px; font-weight: 700; }
+.template-sources a { width: fit-content; display: inline-flex; align-items: center; gap: 5px; color: var(--accent-dark); font-size: 11px; line-height: 1.45; text-decoration: none; }
+.template-sources a:hover { text-decoration: underline; }
+.template-sources img { width: 13px; height: 13px; }
 .ancestor-path { display: flex; flex-wrap: wrap; gap: 4px; }
 .ancestor-path button { border: 0; background: var(--surface-muted); color: var(--text-secondary); border-radius: 3px; padding: 4px 6px; cursor: pointer; font-size: 10px; }
 .ancestor-path button:hover { color: var(--accent-dark); background: var(--accent-soft); }
@@ -250,7 +274,7 @@ mark { background: #f8dfac; color: inherit; border-radius: 2px; padding: 0 1px; 
 .mobile-only { display: none; }
 
 @media (max-width: 1199px) {
-  :root { --detail-w: 340px; }
+  :root { --detail-w: 390px; }
   .topbar { grid-template-columns: auto minmax(260px, 1fr) auto; }
   .workspace { grid-template-columns: minmax(0, 1fr) var(--detail-w); }
   .navigator { position: fixed; left: 0; top: var(--topbar-h); bottom: 0; width: var(--nav-w); z-index: 70; transform: translateX(-100%); transition: transform 190ms ease-out; box-shadow: 12px 0 28px rgb(23 33 29 / .12); }
@@ -271,6 +295,7 @@ mark { background: #f8dfac; color: inherit; border-radius: 2px; padding: 0 1px; 
   .canvas-panel { width: 100%; height: 100%; }
   .navigator { top: var(--topbar-h); }
   .details { position: fixed; right: 0; top: var(--topbar-h); bottom: 0; width: var(--detail-w); z-index: 70; transform: translateX(100%); transition: transform 190ms ease-out; box-shadow: -12px 0 28px rgb(23 33 29 / .12); }
+  .template-boundary > div { grid-template-columns: 68px minmax(0, 1fr); }
   .details.open { transform: translateX(0); }
   .backdrop { inset: var(--topbar-h) 0 0; }
   .canvas-help { display: none; }

@@ -2,6 +2,7 @@
   "use strict";
 
   const data = window.LEARNING_TREE;
+  const codeTemplates = window.CODE_TEMPLATES || {};
   const ICON = "assets/icons/";
   const NODE_W = 210;
   const NODE_H = 76;
@@ -297,7 +298,7 @@
 
     const metadata = [
       ["学习级别", node.level || "按项目"],
-      ["建议周期", node.duration || "按项目"],
+      ["学习方式", node.duration || "按前置关系推进"],
       ["子节点", String((node.children || []).length)],
       ["完成情况", descendantProgress(node).done + " / " + descendantProgress(node).total]
     ];
@@ -319,7 +320,8 @@
     html += detailList("验收标准", node.acceptance);
     html += detailList("常见坑", node.pitfalls);
     html += detailList("典型现象", node.symptoms);
-    if (node.source) {
+    html += renderCodeTemplates(node);
+    if (node.source && !location.hostname.endsWith("github.io")) {
       html += "<section class=\"detail-section\"><h3>原始资料</h3><a class=\"source-link\" href=\"" + escapeAttr(node.source) + "\"><img src=\"" + ICON + "external-link.svg\" alt=\"\">打开对应 Markdown 文档</a></section>";
     }
     if (node.children && node.children.length) {
@@ -331,6 +333,71 @@
     elements.detailContent.querySelectorAll("[data-detail-node]").forEach(function (button) {
       button.addEventListener("click", function () { selectNode(button.dataset.detailNode, true); });
     });
+    elements.detailContent.querySelectorAll("[data-copy-template]").forEach(function (button) {
+      button.addEventListener("click", function () {
+        const index = Number(button.dataset.copyTemplate);
+        const template = (codeTemplates[node.id] || [])[index];
+        if (template) copyTemplate(template.code, button);
+      });
+    });
+  }
+
+  function renderCodeTemplates(node) {
+    const entries = codeTemplates[node.id] || [];
+    if (!entries.length) return "";
+    return "<section class=\"detail-section template-section\"><h3>可复制代码模板</h3>" +
+      "<p class=\"template-notice\">先读“必须修改”。模板提供可靠算法骨架，不包含特定开发板的引脚和驱动初始化。</p>" +
+      entries.map(function (entry, index) {
+        const sources = (entry.sources || []).map(function (source) {
+          return "<a href=\"" + escapeAttr(source.url) + "\" target=\"_blank\" rel=\"noopener noreferrer\"><img src=\"" + ICON + "external-link.svg\" alt=\"\">" + escapeHtml(source.label) + "</a>";
+        }).join("");
+        return "<article class=\"code-template\">" +
+          "<div class=\"template-heading\"><div><span>" + escapeHtml(entry.language) + "</span><strong>" + escapeHtml(entry.title) + "</strong></div>" +
+          "<button class=\"copy-button\" type=\"button\" data-copy-template=\"" + index + "\"><img src=\"" + ICON + "copy.svg\" alt=\"\"><span>复制代码</span></button></div>" +
+          "<p class=\"template-summary\">" + escapeHtml(entry.summary) + "</p>" +
+          "<dl class=\"template-boundary\"><div><dt>可直接复用</dt><dd>" + escapeHtml(entry.reusable) + "</dd></div>" +
+          "<div><dt>必须修改</dt><dd>" + escapeHtml(entry.adapt) + "</dd></div></dl>" +
+          "<pre><code>" + escapeHtml(entry.code) + "</code></pre>" +
+          detailList("代码讲解", entry.explanation) +
+          (sources ? "<div class=\"template-sources\"><span>依据来源</span>" + sources + "</div>" : "") +
+        "</article>";
+      }).join("") + "</section>";
+  }
+
+  async function copyTemplate(code, button) {
+    let copied = false;
+    try {
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(code);
+        copied = true;
+      }
+    } catch (error) {
+      copied = false;
+    }
+    if (!copied) {
+      const area = document.createElement("textarea");
+      area.value = code;
+      area.setAttribute("readonly", "");
+      area.style.position = "fixed";
+      area.style.opacity = "0";
+      document.body.appendChild(area);
+      area.select();
+      copied = document.execCommand("copy");
+      area.remove();
+    }
+    if (!copied) {
+      showToast("复制失败，请在代码区手动全选复制。", true);
+      return;
+    }
+    const label = button.querySelector("span");
+    const oldText = label.textContent;
+    label.textContent = "已复制";
+    button.classList.add("copied");
+    setTimeout(function () {
+      label.textContent = oldText;
+      button.classList.remove("copied");
+    }, 1500);
+    showToast("代码模板已复制。", false);
   }
 
   function detailList(title, items) {
@@ -414,7 +481,7 @@
   function exportProgress() {
     const payload = {
       schema: "control-roadmap-progress-v1",
-      version: "V1.0.0",
+      version: "V1.0.3",
       exportedAt: new Date().toISOString(),
       completed: Array.from(state.completed)
     };
@@ -466,17 +533,35 @@
 
   function searchMatches() {
     if (!state.query) return [];
-    const tokens = state.query.toLocaleLowerCase("zh-CN").split(/\s+/).filter(Boolean);
+    const normalizedQuery = state.query.toLocaleLowerCase("zh-CN").trim();
+    const tokens = normalizedQuery.split(/\s+/).filter(Boolean);
     return state.flat.filter(function (node) {
       if (state.scope !== "all" && node.id !== "root" && !belongsToScope(node.id, state.scope)) return false;
       const haystack = searchableText(node);
       return tokens.every(function (token) { return haystack.includes(token); });
+    }).sort(function (a, b) {
+      const rankDifference = searchTitleRank(b, normalizedQuery) - searchTitleRank(a, normalizedQuery);
+      return rankDifference || a.title.localeCompare(b.title, "zh-CN");
     }).slice(0, 60);
   }
 
+  function searchTitleRank(node, query) {
+    const title = node.title.toLocaleLowerCase("zh-CN");
+    if (title === query) return 4;
+    if (title.startsWith(query)) return 3;
+    const titleTokens = title.split(/[\s/|,，、()（）]+/).filter(Boolean);
+    if (titleTokens.includes(query)) return 2;
+    if (title.includes(query)) return 1;
+    return 0;
+  }
+
   function searchableText(node) {
+    const templateText = (codeTemplates[node.id] || []).flatMap(function (entry) {
+      return [entry.title, entry.summary, entry.reusable, entry.adapt].concat(entry.explanation || []);
+    });
     const values = [node.title, node.type, node.summary, node.level, node.duration]
       .concat(node.prerequisites || [], node.knowledge || [], node.algorithms || [], node.tasks || [], node.acceptance || [], node.pitfalls || [], node.symptoms || []);
+    values.push.apply(values, templateText);
     return values.join(" ").toLocaleLowerCase("zh-CN");
   }
 
