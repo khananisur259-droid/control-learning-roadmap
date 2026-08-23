@@ -224,24 +224,28 @@ float mps_to_rpm(float speed_mps, float wheel_radius_m)
   )];
 
   templates["s05-weight"] = templates["p4"] = [T(
-    "八路灰度加权偏差", "C", "把八个离散黑白传感器变成连续横向偏差，供循迹外环使用。",
-    "加权平均结构可直接复用。",
-    "根据实际接线调整数组顺序和黑白极性；权重只表示横向位置，不是 PID 参数；丢线必须单独处理。",
-`#include <stdint.h>
+    "多路循迹传感器加权偏差", "C", "把任意数量的离散循迹传感器变成连续横向偏差，供循迹外环使用；八路只是配置示例。",
+    "加权平均结构和丢线返回方式可直接复用，传感器数量由调用参数决定。",
+    "必须按实际安装位置填写 position 数组，并核对数组顺序和黑白极性；权重不是 PID 参数；模拟量应先归一化，丢线必须单独处理。",
+`#include <stddef.h>
+#include <stdint.h>
 #include <stdbool.h>
 
 typedef struct { bool line_seen; float error; } LineResult;
 
-LineResult line_error_8(const uint8_t black[8], float last_error)
+LineResult line_error_weighted(const uint8_t black[],
+                               const float position[],
+                               size_t sensor_count,
+                               float last_error)
 {
-    // 从车体左侧到右侧，权重关于中心对称。
-    static const float weight[8] = {-7, -5, -3, -1, 1, 3, 5, 7};
+    // black[i]：该路是否检测到黑线，检测到为1，否则为0。
+    // position[i]：该传感器相对车体中心的横向位置，单位自定但必须统一。
     float weighted_sum = 0.0f;
-    uint8_t active = 0;
+    size_t active = 0u;
 
-    for (uint8_t i = 0; i < 8; ++i) {
+    for (size_t i = 0u; i < sensor_count; ++i) {
         if (black[i]) {
-            weighted_sum += weight[i];
+            weighted_sum += position[i];
             ++active;
         }
     }
@@ -253,8 +257,19 @@ LineResult line_error_8(const uint8_t black[8], float last_error)
     }
     LineResult ok = {true, weighted_sum / (float)active};
     return ok;
+}
+
+// 五路传感器示例。更换为三路、六路或八路时，只改数组和数量。
+static const float sensor_position[5] = {-2.0f, -1.0f, 0.0f, 1.0f, 2.0f};
+
+void example(void)
+{
+    const uint8_t black[5] = {0u, 1u, 1u, 0u, 0u};
+    LineResult result = line_error_weighted(
+        black, sensor_position, 5u, 0.0f);
+    (void)result;
 }`,
-    ["多路同时压线时取位置平均，偏差比 if-else 分段更连续。", "全白不是中心，应进入明确的丢线状态。", "十字线、起停横线等特殊图形应由状态机另行判断。"],
+    ["传感器路数不是算法限制，数组长度和 sensor_count 必须一致。", "多个探头同时压线时取横向位置平均，偏差比大量 if-else 更连续。", "全白不是中心，应进入明确的丢线状态。", "十字线、起停横线等特殊图形应由状态机另行判断。"],
     [{ label: "Pololu QTR 反射传感器官方文档", url: "https://www.pololu.com/docs/0J19/all" }]
   )];
 

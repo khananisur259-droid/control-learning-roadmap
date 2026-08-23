@@ -481,7 +481,7 @@
   function exportProgress() {
     const payload = {
       schema: "control-roadmap-progress-v1",
-      version: "V1.0.3",
+      version: "V1.0.4",
       exportedAt: new Date().toISOString(),
       completed: Array.from(state.completed)
     };
